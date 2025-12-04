@@ -180,6 +180,7 @@ public class ClienteService {
                     cliente.setIdentificacion(rs.getLong("IDENTIFICACION"));
                     cliente.setEmail(rs.getString("EMAIL"));
                     cliente.setTelefono(rs.getString("TELEFONO"));
+                    cliente.setUsuarioId(rs.getLong("USUARIO_ID"));
                     cliente.setDireccion(rs.getString("DIRECCION"));
                     cliente.setTotalCuentas(rs.getLong("TOTAL_CUENTAS"));
                     cliente.setSaldoTotal(rs.getBigDecimal("SALDO_TOTAL"));

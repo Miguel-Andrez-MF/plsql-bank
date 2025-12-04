@@ -2,6 +2,7 @@ package com.Plsql.ProyectoDB.services;
 
 import com.Plsql.ProyectoDB.dto.HistorialTransaccionDTO;
 import com.Plsql.ProyectoDB.dto.TransaccionDTO;
+import com.Plsql.ProyectoDB.dto.UpdateTransaccionRequest;
 import oracle.jdbc.OracleTypes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -297,4 +298,42 @@ public class TransaccionService {
             this.exitoso = exitoso;
         }
     }
+
+    public void updateTransaccion(Long id, UpdateTransaccionRequest request) {
+        if (request.getMonto() == null && request.getTipoTransaccionId() == null) {
+            throw new IllegalArgumentException("Se requiere al menos un campo (monto o tipoTransaccionId) para actualizar.");
+        }
+
+        StringBuilder sql = new StringBuilder("UPDATE PROYECTODB.TBL_TRANSACCIONES SET ");
+        List<Object> params = new ArrayList<>();
+
+        if (request.getMonto() != null) {
+            sql.append("MONTO = ?");
+            params.add(request.getMonto());
+        }
+
+        if (request.getTipoTransaccionId() != null) {
+            if (!params.isEmpty()) {
+                sql.append(", ");
+            }
+            sql.append("TIPO_TRANSAC_ID = ?");
+            params.add(request.getTipoTransaccionId());
+        }
+
+        sql.append(" WHERE TRANSACCION_ID = ?");
+        params.add(id);
+
+        try {
+            int updatedRows = jdbcTemplate.update(sql.toString(), params.toArray());
+            if (updatedRows == 0) {
+                throw new TransaccionUpdateException("No se encontró la transacción con ID: " + id);
+            }
+        } catch (DataAccessException e) {
+            // Aquí capturamos la excepción de la base de datos
+            // El mensaje del trigger estará en la causa raíz.
+            Throwable rootCause = e.getMostSpecificCause();
+            throw new TransaccionUpdateException("Error al actualizar la transacción: " + rootCause.getMessage());
+        }
+    }
+
 }
